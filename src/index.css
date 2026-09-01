@@ -1,0 +1,707 @@
+/* ─── Google Fonts ───────────────────────────────────────────────────────────
+   Press Start 2P  — pixel/Minecraft-inspired display font
+   Inter           — clean, highly readable body font
+──────────────────────────────────────────────────────────────────────────── */
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@300;400;500;600&display=swap");
+
+@import "tailwindcss";
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────────
+   All colors, radii, and spacing live here.
+   Change these to retheme the entire app.
+──────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Colors */
+  --color-cream: #F5EBDD;
+  --color-cream-card: rgba(255, 255, 255, 0.72);
+  --color-cream-card-focused: #FFFFFF;
+  --color-cream-dark: #EAE0D0;
+  --color-cream-deeper: #DFD3C0;
+  --color-brown-950: #1E1611;
+  --color-brown-900: #2C211A;
+  --color-brown-700: #4A3728;
+  --color-brown-600: #5C4533;
+  --color-brown-500: #7A6457;
+  --color-brown-300: #B8A898;
+  --color-brown-100: #D4C4B0;
+  --color-border: #E8D9C8;
+
+  /* Semantic accents */
+  --color-active: #4A7C59;
+  /* refined forest green — current class */
+  --color-active-bg: #EEF5F0;
+  /* crisp light green tint */
+  --color-next: #C9943A;
+  /* refined warm gold — next class */
+  --color-next-bg: #FAF4EA;
+  /* warm gold tint */
+  --color-lunch: #8C5E38;
+  /* warm cinnamon amber — lunch */
+  --color-lunch-bg: #F7F0E6;
+  /* warm cream tint */
+  --color-free: #587B6A;
+  /* deep sage — free time */
+
+  /* Typography */
+  --font-pixel: "Press Start 2P", monospace;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Radii */
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  /* Easing */
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────────────────────*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-cream);
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-brown-900);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  /* Subtle warm grain */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  overflow-x: hidden;
+}
+
+/* ─── Apple-Grade Modal Arrival & Depletion Motion System ─────────────────── */
+.modal-backdrop-enter {
+  animation: appleBackdropEnter 800ms var(--ease-apple) forwards;
+}
+
+.modal-backdrop-exit {
+  animation: appleBackdropExit 600ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes appleBackdropEnter {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    background-color: rgba(30, 22, 17, 0);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(30, 22, 17, 0.65);
+  }
+}
+
+@keyframes appleBackdropExit {
+  0% {
+    opacity: 1;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(30, 22, 17, 0.65);
+  }
+  100% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    background-color: rgba(30, 22, 17, 0);
+  }
+}
+
+.modal-card-enter {
+  animation: appleCardEnter 850ms var(--ease-apple) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.modal-card-exit {
+  animation: appleCardExit 580ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+
+@keyframes appleCardEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(32px);
+    filter: blur(10px);
+  }
+  50% {
+    filter: blur(3px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes appleCardExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.93) translateY(20px);
+    filter: blur(8px);
+  }
+}
+
+.modal-step-enter {
+  animation: appleStepEnter 650ms var(--ease-apple) forwards;
+}
+
+@keyframes appleStepEnter {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.96);
+    filter: blur(6px);
+  }
+  50% {
+    filter: blur(1.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+.stagger-1 { animation: appleFadeUp 650ms var(--ease-apple) 100ms both; }
+.stagger-2 { animation: appleFadeUp 700ms var(--ease-apple) 220ms both; }
+.stagger-3 { animation: appleFadeUp 750ms var(--ease-apple) 340ms both; }
+.stagger-4 { animation: appleFadeUp 800ms var(--ease-apple) 460ms both; }
+.stagger-5 { animation: appleFadeUp 850ms var(--ease-apple) 580ms both; }
+
+@keyframes appleFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.16) 40%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.16) 60%,
+    transparent 80%
+  );
+  transform: rotate(25deg) translateX(-100%);
+  animation: appleShimmer 5.5s ease-in-out infinite;
+}
+
+@keyframes appleShimmer {
+  0%, 60% {
+    transform: rotate(25deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(25deg) translateX(100%);
+  }
+}
+
+/* ─── Glassmorphism Button with Silver Minimal Glow ─────────────────────── */
+.glass-btn-silver {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 254, 0.78) 50%,
+    rgba(238, 243, 250, 0.86) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 222, 236, 0.85);
+  box-shadow:
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px 0 rgba(195, 210, 228, 0.3),
+    0 3px 12px -2px rgba(30, 22, 17, 0.05),
+    0 0 20px -2px rgba(185, 205, 228, 0.45);
+  transition:
+    transform 450ms var(--ease-apple),
+    box-shadow 450ms var(--ease-apple),
+    border-color 450ms var(--ease-apple),
+    background 450ms var(--ease-apple);
+}
+
+.glass-btn-silver::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.12) 40%,
+    transparent 60%
+  );
+  pointer-events: none;
+  opacity: 0.85;
+  transition: opacity 450ms var(--ease-apple);
+}
+
+.glass-btn-silver:hover {
+  border-color: rgba(185, 205, 230, 0.95);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(245, 248, 254, 0.9) 50%,
+    rgba(236, 243, 252, 0.94) 100%
+  );
+  box-shadow:
+    inset 0 1px 2px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 1px 0 rgba(185, 205, 228, 0.4),
+    0 8px 24px -4px rgba(30, 22, 17, 0.07),
+    0 0 28px 2px rgba(180, 205, 232, 0.7);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.glass-btn-silver:hover::before {
+  opacity: 1;
+}
+
+.glass-btn-silver:active {
+  transform: translateY(0px) scale(0.98);
+  box-shadow:
+    inset 0 1.5px 3px 0 rgba(145, 165, 190, 0.25),
+    0 2px 8px rgba(30, 22, 17, 0.04),
+    0 0 16px 0 rgba(180, 205, 232, 0.5);
+}
+
+/* ─── Minimal Brown Droplet Ripple ────────────────────────────────────────── */
+.droplet-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.brown-droplet {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(74, 55, 40, 0.32) 0%,
+    rgba(92, 69, 51, 0.18) 45%,
+    rgba(44, 33, 26, 0.04) 70%,
+    transparent 100%
+  );
+  transform: translate(-50%, -50%) scale(0);
+  animation: dropletExpand 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes dropletExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.9;
+  }
+  40% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* ─── Header Entrance Motion ────────────────────────────────────────────────*/
+.header-entrance {
+  animation: headerFadeIn 800ms var(--ease-apple) forwards;
+}
+
+.animate-fade-in-1 {
+  animation: itemSlideIn 500ms var(--ease-apple) 100ms both;
+}
+
+.animate-fade-in-2 {
+  animation: itemSlideIn 600ms var(--ease-apple) 200ms both;
+}
+
+.animate-fade-in-3 {
+  animation: itemSlideIn 600ms var(--ease-apple) 300ms both;
+}
+
+.animate-fade-in-4 {
+  animation: itemSlideIn 600ms var(--ease-apple) 400ms both;
+}
+
+@keyframes headerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Typography ─────────────────────────────────────────────────────────────*/
+.font-pixel {
+  font-family: var(--font-pixel);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Timeline Walkthrough Item Focus System ──────────────────────────────────
+   Continuous viewport focus:
+   - In-focus item is prominent, slightly elevated, high contrast
+   - Surrounding items maintain context (opacity ~0.65-0.75, scale ~0.98)
+   - Past items are quieter
+──────────────────────────────────────────────────────────────────────────── */
+.timeline-item {
+  opacity: 0.65;
+  transform: scale(0.98) translateY(0);
+  transition:
+    opacity 350ms var(--ease-apple),
+    transform 350ms var(--ease-apple),
+    box-shadow 350ms var(--ease-apple);
+  will-change: opacity, transform;
+}
+
+.timeline-item.is-focused {
+  opacity: 1;
+  transform: scale(1.02) translateY(-2px);
+}
+
+.timeline-item.is-past {
+  opacity: 0.45;
+  transform: scale(0.97);
+}
+
+.timeline-item.is-past.is-focused {
+  opacity: 0.78;
+  transform: scale(0.99);
+}
+
+.timeline-item.is-current {
+  opacity: 1 !important;
+  transform: scale(1.02) !important;
+}
+
+/* ─── Class Progress Bar ─────────────────────────────────────────────────────*/
+.progress-track {
+  background: var(--color-brown-100);
+  border-radius: var(--radius-pill);
+  height: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--color-active);
+  border-radius: var(--radius-pill);
+  transition: width 1s linear;
+}
+
+/* ─── Timeline Spine & Markers ───────────────────────────────────────────────*/
+.timeline-spine {
+  width: 2px;
+  background: linear-gradient(to bottom,
+      transparent 0%,
+      var(--color-brown-100) 10%,
+      var(--color-brown-100) 90%,
+      transparent 100%);
+  flex-shrink: 0;
+}
+
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-brown-300);
+  border: 2px solid var(--color-cream);
+  flex-shrink: 0;
+  transition:
+    background 300ms var(--ease-apple),
+    transform 300ms var(--ease-apple),
+    box-shadow 300ms var(--ease-apple);
+}
+
+.timeline-dot.dot-active {
+  width: 12px;
+  height: 12px;
+  background: var(--color-active);
+  transform: scale(1.25);
+  box-shadow: 0 0 0 4px var(--color-active-bg);
+}
+
+.timeline-dot.dot-next {
+  background: var(--color-next);
+  transform: scale(1.15);
+  box-shadow: 0 0 0 3px var(--color-next-bg);
+}
+
+.timeline-dot.dot-past {
+  background: var(--color-brown-100);
+  transform: scale(0.9);
+}
+
+/* ─── Editorial Class Surfaces ───────────────────────────────────────────────*/
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-cream-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 1.4rem 1.35rem;
+  box-shadow: 0 2px 8px rgba(44, 33, 26, 0.04);
+  transition:
+    box-shadow 300ms var(--ease-apple),
+    border-color 300ms var(--ease-apple),
+    background-color 300ms var(--ease-apple);
+}
+
+.card:hover {
+  border-color: var(--color-brown-300);
+}
+
+.timeline-item.is-focused .card {
+  background: var(--color-cream-card-focused);
+  box-shadow: 0 6px 24px rgba(44, 33, 26, 0.07);
+}
+
+.card-current {
+  background: var(--color-active-bg) !important;
+  border: 1.5px solid rgba(74, 124, 89, 0.35);
+  box-shadow: 0 6px 28px rgba(74, 124, 89, 0.12) !important;
+}
+
+.card-next {
+  background: var(--color-next-bg) !important;
+  border: 1.5px solid rgba(201, 148, 58, 0.3);
+  box-shadow: 0 6px 28px rgba(201, 148, 58, 0.1) !important;
+}
+
+.card-lunch {
+  background: var(--color-lunch-bg);
+  border: 1px solid rgba(140, 94, 56, 0.22);
+}
+
+.card-past {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(232, 217, 200, 0.7);
+  box-shadow: none;
+}
+
+/* ─── Label Chip ─────────────────────────────────────────────────────────────*/
+.label-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.32em 0.75em;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+}
+
+.chip-now {
+  background: var(--color-active);
+  color: #ffffff;
+}
+
+.chip-next {
+  background: var(--color-next);
+  color: #ffffff;
+}
+
+.chip-lunch {
+  background: var(--color-lunch);
+  color: #ffffff;
+}
+
+.chip-past {
+  background: var(--color-brown-100);
+  color: var(--color-brown-600);
+}
+
+/* ─── Free Gap ───────────────────────────────────────────────────────────────*/
+.free-gap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--color-free);
+}
+
+.free-gap-dots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.5;
+}
+
+.free-gap-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--color-free);
+}
+
+/* ─── Notification Bar ───────────────────────────────────────────────────────*/
+.notif-bar {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--color-cream) 60%, transparent);
+  pointer-events: none;
+}
+
+.notif-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-brown-900);
+  color: var(--color-cream);
+  border-radius: var(--radius-pill);
+  padding: 0.6rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow:
+    0 4px 20px rgba(44, 33, 26, 0.25),
+    0 1px 4px rgba(44, 33, 26, 0.15);
+  pointer-events: auto;
+  max-width: 420px;
+  width: 100%;
+  transition: opacity 400ms var(--ease-gentle), transform 400ms var(--ease-gentle);
+}
+
+.notif-pill.notif-hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+
+.notif-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-next);
+  flex-shrink: 0;
+  animation: notif-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes notif-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+}
+
+/* ─── Countdown ──────────────────────────────────────────────────────────────*/
+.countdown-tick {
+  transition: opacity 300ms ease;
+}
+
+/* ─── Day end / empty state ──────────────────────────────────────────────────*/
+.empty-state {
+  text-align: center;
+  padding: 2rem 1.5rem 0.75rem;
+  color: var(--color-brown-500);
+}
+
+/* ─── Scrollbar (minimal, warm) ──────────────────────────────────────────────*/
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brown-100);
+  border-radius: 99px;
+}
+
+/* ─── Reduced Motion ─────────────────────────────────────────────────────────*/
+@media (prefers-reduced-motion: reduce) {
+
+  .timeline-item,
+  .progress-fill,
+  .notif-pill,
+  .timeline-dot {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .timeline-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
