@@ -25,8 +25,8 @@ export const FreeGap: React.FC<FreeGapProps> = ({ entry }) => {
       <div
         className="px-3.5 py-1.5 rounded-full border border-dashed text-center inline-flex items-center gap-2"
         style={{
-          borderColor: 'rgba(88, 123, 106, 0.35)',
-          background: 'rgba(88, 123, 106, 0.05)',
+          borderColor: 'var(--color-brown-100, #C9C8C3)',
+          background: 'rgba(102, 102, 98, 0.04)',
         }}
       >
         <span className="font-pixel text-[0.58rem] tracking-wider" style={{ color: 'var(--color-free)', fontWeight: 600 }}>

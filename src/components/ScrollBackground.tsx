@@ -38,7 +38,7 @@ export const ScrollBackground: React.FC = () => {
         opacity: 0.4,
       }}
     >
-      {/* ── Soft Warm Haze (top-left, drifts gently down-right) ─── */}
+      {/* ── Soft Graphite Haze (top-left, drifts gently down-right) ─── */}
       <div
         style={{
           position: 'absolute',
@@ -47,14 +47,14 @@ export const ScrollBackground: React.FC = () => {
           width: '500px',
           height: '500px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(212, 196, 176, 0.7) 0%, rgba(212, 196, 176, 0.2) 50%, transparent 72%)',
+          background: 'radial-gradient(circle, rgba(190, 190, 185, 0.45) 0%, rgba(190, 190, 185, 0.12) 50%, transparent 72%)',
           filter: 'blur(60px)',
           transform: `translate3d(${y * 0.08}px, ${y * 0.12}px, 0)`,
           willChange: 'transform',
         }}
       />
 
-      {/* ── Cool Stone Whisper (bottom-right, drifts up-left) ─── */}
+      {/* ── Cool Slate Whisper (bottom-right, drifts up-left) ─── */}
       <div
         style={{
           position: 'absolute',
@@ -63,14 +63,14 @@ export const ScrollBackground: React.FC = () => {
           width: '550px',
           height: '550px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(184, 168, 152, 0.5) 0%, rgba(184, 168, 152, 0.1) 50%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(160, 160, 155, 0.35) 0%, rgba(160, 160, 155, 0.08) 50%, transparent 70%)',
           filter: 'blur(70px)',
           transform: `translate3d(${-y * 0.06}px, ${-y * 0.1}px, 0)`,
           willChange: 'transform',
         }}
       />
 
-      {/* ── Faint Center Warmth ─── */}
+      {/* ── Faint Center Haze ─── */}
       <div
         style={{
           position: 'absolute',
@@ -80,7 +80,7 @@ export const ScrollBackground: React.FC = () => {
           width: '400px',
           height: '400px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(234, 224, 208, 0.6) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(215, 214, 209, 0.4) 0%, transparent 65%)',
           filter: 'blur(50px)',
           transform: `translate3d(${-y * 0.03}px, ${y * 0.06}px, 0) scale(${1 + y * 0.00015})`,
           willChange: 'transform',
@@ -101,8 +101,8 @@ export const ScrollBackground: React.FC = () => {
           opacity: 0.55,
         }}
       >
-        <line x1="10" y1="1" x2="10" y2="19" stroke="#B8A898" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="1" y1="10" x2="19" y2="10" stroke="#B8A898" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="10" y1="1" x2="10" y2="19" stroke="#A4A49F" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="1" y1="10" x2="19" y2="10" stroke="#A4A49F" strokeWidth="1.5" strokeLinecap="round" />
       </svg>
 
       {/* Dashed ring — right side */}
@@ -117,7 +117,7 @@ export const ScrollBackground: React.FC = () => {
           opacity: 0.45,
         }}
       >
-        <circle cx="18" cy="18" r="14" stroke="#D4C4B0" strokeWidth="1.2" strokeDasharray="3.5 3" fill="none" />
+        <circle cx="18" cy="18" r="14" stroke="#C9C8C3" strokeWidth="1.2" strokeDasharray="3.5 3" fill="none" />
       </svg>
 
       {/* Small diamond — left mid */}
@@ -132,7 +132,7 @@ export const ScrollBackground: React.FC = () => {
           opacity: 0.5,
         }}
       >
-        <rect x="1" y="1" width="12" height="12" rx="1" stroke="#B8A898" strokeWidth="1.2" fill="none" />
+        <rect x="1" y="1" width="12" height="12" rx="1" stroke="#A4A49F" strokeWidth="1.2" fill="none" />
       </svg>
 
       {/* Tiny dot pair — right lower */}
@@ -149,8 +149,8 @@ export const ScrollBackground: React.FC = () => {
           gap: '6px',
         }}
       >
-        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#D4C4B0' }} />
-        <div style={{ width: 3, height: 3, borderRadius: '50%', background: '#D4C4B0', marginLeft: 4 }} />
+        <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#C9C8C3' }} />
+        <div style={{ width: 3, height: 3, borderRadius: '50%', background: '#C9C8C3', marginLeft: 4 }} />
       </div>
 
       {/* Single thin horizontal rule accent */}
@@ -162,7 +162,7 @@ export const ScrollBackground: React.FC = () => {
           width: '28px',
           height: '1.5px',
           borderRadius: '2px',
-          background: '#D4C4B0',
+          background: '#C9C8C3',
           transform: `translate3d(0px, ${-y * 0.4}px, 0)`,
           willChange: 'transform',
           opacity: 0.5,
@@ -174,7 +174,7 @@ export const ScrollBackground: React.FC = () => {
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(184, 168, 152, 0.18) 0.8px, transparent 0)',
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(160, 160, 155, 0.14) 0.8px, transparent 0)',
           backgroundSize: '40px 40px',
           backgroundPosition: `0px ${-y * 0.1}px`,
           willChange: 'background-position',

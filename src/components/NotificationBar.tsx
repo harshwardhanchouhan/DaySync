@@ -40,7 +40,10 @@ export const NotificationBar: React.FC<NotificationBarProps> = ({
           {nextEntry && nextEntry.subject && (
             <div className="flex-1 min-w-0 pr-2">
               <div className="flex items-center gap-1.5">
-                <span className="font-pixel text-[0.48rem] uppercase tracking-wider text-amber-400">
+                <span
+                  className="font-pixel text-[0.48rem] uppercase tracking-wider"
+                  style={{ color: 'var(--color-brown-300)' }}
+                >
                   NEXT
                 </span>
               </div>
@@ -56,7 +59,8 @@ export const NotificationBar: React.FC<NotificationBarProps> = ({
           {nextEntry?.minutesUntilStart != null && (
             <div className="text-right flex-shrink-0">
               <span
-                className="font-pixel inline-block text-[0.52rem] text-amber-400 tracking-wide"
+                className="font-pixel inline-block text-[0.52rem] tracking-wide"
+                style={{ color: 'var(--color-brown-300)' }}
               >
                 {formatCountdown(nextEntry.minutesUntilStart)}
               </span>

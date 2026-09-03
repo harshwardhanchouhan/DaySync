@@ -137,7 +137,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         isExiting ? 'modal-backdrop-exit' : 'modal-backdrop-enter'
       }`}
       style={{
-        background: 'rgba(30, 22, 17, 0.65)',
+        background: 'var(--color-modal)',
       }}
     >
       <div
@@ -148,7 +148,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           background: 'var(--color-cream-card-focused, #FFFFFF)',
           borderColor: 'var(--color-border)',
           boxShadow:
-            '0 24px 50px -12px rgba(44, 33, 26, 0.22), 0 4px 18px rgba(44, 33, 26, 0.08)',
+            '0 24px 50px -12px rgba(17, 17, 17, 0.22), 0 4px 18px rgba(17, 17, 17, 0.08)',
         }}
       >
         {/* Top Logo / Pixel Badge */}
@@ -173,7 +173,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               style={{
                 background: 'var(--color-next-bg)',
                 color: 'var(--color-next)',
-                border: '1px solid rgba(201, 148, 58, 0.25)',
+                border: '1px solid var(--color-next-border)',
               }}
             >
               SST Portal
@@ -280,7 +280,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
               <div className="pt-2 text-center stagger-5">
                 <p className="text-[0.72rem]" style={{ color: 'var(--color-brown-500)' }}>
-                  Only authorized <span className="font-semibold text-amber-800">@sst.scaler.com</span> accounts are permitted.
+                  Only authorized <span className="font-semibold" style={{ color: 'var(--color-brown-950)' }}>@sst.scaler.com</span> accounts are permitted.
                 </p>
               </div>
             </div>
@@ -331,12 +331,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       type="button"
                       onClick={() => setSelectedGroup(grp)}
                       className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden cursor-pointer transform active:scale-[0.96] hover:-translate-y-0.5 ${
-                        isSelected ? 'ring-2 ring-emerald-600/30 shadow-md' : 'hover:border-stone-400 hover:shadow-xs'
+                        isSelected ? 'ring-2 ring-stone-900/20 shadow-md' : 'hover:border-stone-400 hover:shadow-xs'
                       }`}
                       style={{
                         background: isSelected ? 'var(--color-active-bg)' : 'var(--color-cream)',
                         borderColor: isSelected ? 'var(--color-active)' : 'var(--color-border)',
-                        boxShadow: isSelected ? '0 4px 18px rgba(74, 124, 89, 0.18)' : 'none',
+                        boxShadow: isSelected ? '0 4px 18px var(--color-current-shadow)' : 'none',
                       }}
                     >
                       <div className="flex items-center justify-between">

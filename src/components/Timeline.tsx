@@ -93,6 +93,7 @@ export const Timeline: React.FC<TimelineProps> = ({
 }) => {
   // Auto-scroll to the current/next entry on first render
   const currentRef = useRef<HTMLDivElement>(null);
+  const timelineContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToCurrent = useCallback(() => {
     if (currentRef.current) {
@@ -110,8 +111,101 @@ export const Timeline: React.FC<TimelineProps> = ({
     return () => clearTimeout(id);
   }, []); // Only on mount
 
+  // ─── Continuous Scroll Motion Coordinator ─────────────────────────────────
+  // Smoothly modulates card scale, physical elevation, and opacity on EVERY pixel of scroll.
+  useEffect(() => {
+    const container = timelineContainerRef.current;
+    if (!container) return;
+
+    const isReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (isReducedMotion) return;
+
+    let ticking = false;
+
+    const updateCardTransforms = () => {
+      const items = container.querySelectorAll<HTMLElement>('.timeline-item');
+      if (!items.length) {
+        ticking = false;
+        return;
+      }
+
+      const viewportH = window.innerHeight;
+      const focalCenter = viewportH * 0.48;
+      const range = viewportH * 0.55;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const rect = item.getBoundingClientRect();
+
+        // Skip items far outside the active viewport range
+        if (rect.bottom < -120 || rect.top > viewportH + 120) {
+          continue;
+        }
+
+        const cardCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(cardCenter - focalCenter);
+        const proximity = Math.max(0, Math.min(1, 1 - distance / range));
+        // Hermite smoothstep for seamless non-linear interpolation
+        const t = proximity * proximity * (3 - 2 * proximity);
+
+        const status = item.getAttribute('data-entry-status');
+
+        let scale: number;
+        let translateY: number;
+        let opacity: number;
+
+        if (status === 'current') {
+          scale = 1.005 + 0.020 * t;     // 1.005 -> 1.025
+          translateY = -1.0 - 2.5 * t;    // -1px -> -3.5px
+          opacity = 0.92 + 0.08 * t;      // 0.92 -> 1.00
+        } else if (status === 'next') {
+          scale = 0.985 + 0.030 * t;     // 0.985 -> 1.015
+          translateY = -2.0 * t;          // 0px -> -2px
+          opacity = 0.82 + 0.18 * t;      // 0.82 -> 1.00
+        } else if (status === 'past') {
+          scale = 0.970 + 0.018 * t;     // 0.970 -> 0.988
+          translateY = -1.0 * t;          // 0px -> -1px
+          opacity = 0.42 + 0.30 * t;      // 0.42 -> 0.72
+        } else {
+          // Standard future classes
+          scale = 0.980 + 0.028 * t;     // 0.980 -> 1.008
+          translateY = -2.0 * t;          // 0px -> -2px
+          opacity = 0.70 + 0.30 * t;      // 0.70 -> 1.00
+        }
+
+        item.style.transform = `scale(${scale.toFixed(4)}) translateY(${translateY.toFixed(2)}px)`;
+        item.style.opacity = opacity.toFixed(3);
+      }
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateCardTransforms);
+      }
+    };
+
+    // Attach passive scroll and resize listeners
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    // Initial calculation after render
+    const initTimer = setTimeout(updateCardTransforms, 50);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      clearTimeout(initTimer);
+    };
+  }, [entries]);
+
   return (
-    <div className="pb-32">
+    <div ref={timelineContainerRef} className="pb-32">
       {hasNoClasses ? (
         <DayEndState variant="no-classes" />
       ) : (
@@ -213,7 +307,14 @@ export const Timeline: React.FC<TimelineProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/50 border border-stone-200/80 shadow-xs">
             <div className="flex items-center gap-2.5">
               <span className="font-pixel text-[0.65rem] text-stone-600">Active Batch:</span>
-              <span className="font-pixel text-xs px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+              <span
+                className="font-pixel text-xs px-2.5 py-1 rounded-lg font-bold"
+                style={{
+                  background: 'var(--color-active-bg)',
+                  color: 'var(--color-active)',
+                  border: '1px solid var(--color-current-border)',
+                }}
+              >
                 Group {currentGroup || 'B'}
               </span>
             </div>

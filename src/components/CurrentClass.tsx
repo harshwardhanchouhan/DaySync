@@ -65,7 +65,7 @@ export const CurrentClass: React.FC<CurrentClassProps> = ({ entry }) => {
       </div>
 
       {/* Meta Row: Room & Faculty */}
-      <div className="flex items-center gap-3.5 flex-wrap pt-1 border-t border-emerald-900/10">
+      <div className="flex items-center gap-3.5 flex-wrap pt-1 border-t border-stone-900/10">
         {entry.room && (
           <span
             className="text-sm font-semibold flex items-center gap-1.5"
