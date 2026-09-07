@@ -159,10 +159,16 @@ function App() {
 
   // ── Login & Logout handlers ───────────────────────────────────────────────
   const handleLogin = async (newUser: StudentAuthUser) => {
-    setUser(newUser);
+    const effectiveId =
+      currentUserId ||
+      newUser.id ||
+      (newUser.email ? 'usr-' + btoa(newUser.email).replace(/=/g, '') : undefined);
+    if (effectiveId) setCurrentUserId(effectiveId);
+    const updatedUser = { ...newUser, id: effectiveId };
+    setUser(updatedUser);
     setPendingStudent(null);
     setShowGroupModal(false);
-    await saveStudentProfile(newUser, currentUserId);
+    await saveStudentProfile(updatedUser, effectiveId);
   };
 
   const handleLogout = async () => {
@@ -237,6 +243,9 @@ function App() {
           entries={dayState.entries}
           isDayOver={dayState.isDayOver}
           hasNoClasses={dayState.hasNoClasses}
+          now={now}
+          currentUser={user}
+          currentUserId={currentUserId || user?.id}
           currentGroup={user?.group}
           onSwitchGroup={() => setShowGroupModal(true)}
           onLogout={handleLogout}

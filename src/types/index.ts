@@ -11,8 +11,36 @@ export interface StudentProfile {
 }
 
 export interface StudentAuthUser extends StudentProfile {
+  id?: string;
   name: string;
   email: string;
+}
+
+// ─── Class Comments & Updates Types ───────────────────────────────────────────
+
+export type VoteType = 'up' | 'down';
+
+export interface ClassComment {
+  id: string;
+  occurrence_id: string;
+  user_id: string;
+  author_name: string;
+  content: string;
+  upvotes_count: number;
+  downvotes_count: number;
+  deletion_eligible_at: string | null;
+  expires_at: string;
+  created_at: string;
+  user_vote?: VoteType | null;
+}
+
+export interface ClassCommentVote {
+  id: string;
+  comment_id: string;
+  user_id: string;
+  vote_type: VoteType;
+  created_at: string;
+  updated_at: string;
 }
 
 // ─── Timetable Entry Types ────────────────────────────────────────────────────

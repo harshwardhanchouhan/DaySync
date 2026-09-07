@@ -1,14 +1,32 @@
 import React from 'react';
-import type { ScheduledEntry } from '../types';
+import type { ScheduledEntry, StudentAuthUser } from '../types';
 import { TimeRange } from './TimeUtils';
+import { ClassComments } from './ClassComments';
+import { getOccurrenceId, getClassOccurrenceExpiration } from '../utils/classOccurrence';
 
 interface FutureClassProps {
   entry: ScheduledEntry;
   /** True if this is a past class (show even more subdued) */
   isPast?: boolean;
+  occurrenceId?: string;
+  expiresAt?: Date;
+  currentUser?: StudentAuthUser | null;
+  currentUserId?: string;
 }
 
-export const FutureClass: React.FC<FutureClassProps> = ({ entry, isPast = false }) => {
+export const FutureClass: React.FC<FutureClassProps> = ({
+  entry,
+  isPast = false,
+  occurrenceId,
+  expiresAt,
+  currentUser,
+  currentUserId,
+}) => {
+  const resolvedOccurrenceId =
+    occurrenceId || getOccurrenceId(new Date(), 'B', entry);
+  const resolvedExpiresAt =
+    expiresAt || getClassOccurrenceExpiration(new Date(), entry.endTime);
+
   return (
     <div className={`card ${isPast ? 'card-past' : ''}`}>
       {isPast && (
@@ -54,6 +72,17 @@ export const FutureClass: React.FC<FutureClassProps> = ({ entry, isPast = false 
           </span>
         )}
       </div>
+
+      {/* Temporary Class Updates (only for active/upcoming, strictly hidden for past) */}
+      {!isPast && (
+        <ClassComments
+          occurrenceId={resolvedOccurrenceId}
+          expiresAt={resolvedExpiresAt}
+          isPast={false}
+          currentUser={currentUser}
+          currentUserId={currentUserId}
+        />
+      )}
     </div>
   );
 };

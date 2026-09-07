@@ -1,13 +1,30 @@
 import React from 'react';
-import type { ScheduledEntry } from '../types';
+import type { ScheduledEntry, StudentAuthUser } from '../types';
 import { TimeRange, formatCountdown } from './TimeUtils';
+import { ClassComments } from './ClassComments';
+import { getOccurrenceId, getClassOccurrenceExpiration } from '../utils/classOccurrence';
 
 interface NextClassProps {
   entry: ScheduledEntry;
+  occurrenceId?: string;
+  expiresAt?: Date;
+  currentUser?: StudentAuthUser | null;
+  currentUserId?: string;
 }
 
-export const NextClass: React.FC<NextClassProps> = ({ entry }) => {
+export const NextClass: React.FC<NextClassProps> = ({
+  entry,
+  occurrenceId,
+  expiresAt,
+  currentUser,
+  currentUserId,
+}) => {
   const minutesUntil = entry.minutesUntilStart ?? 0;
+
+  const resolvedOccurrenceId =
+    occurrenceId || getOccurrenceId(new Date(), 'B', entry);
+  const resolvedExpiresAt =
+    expiresAt || getClassOccurrenceExpiration(new Date(), entry.endTime);
 
   return (
     <div className="card card-next">
@@ -63,6 +80,15 @@ export const NextClass: React.FC<NextClassProps> = ({ entry }) => {
           </span>
         )}
       </div>
+
+      {/* Temporary Class Updates & Comments */}
+      <ClassComments
+        occurrenceId={resolvedOccurrenceId}
+        expiresAt={resolvedExpiresAt}
+        isPast={false}
+        currentUser={currentUser}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 };

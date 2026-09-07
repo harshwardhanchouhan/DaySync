@@ -1,18 +1,35 @@
 import React from 'react';
-import type { ScheduledEntry } from '../types';
+import type { ScheduledEntry, StudentAuthUser } from '../types';
 import { TimeRange } from './TimeUtils';
+import { ClassComments } from './ClassComments';
+import { getOccurrenceId, getClassOccurrenceExpiration } from '../utils/classOccurrence';
 
 interface CurrentClassProps {
   entry: ScheduledEntry;
+  occurrenceId?: string;
+  expiresAt?: Date;
+  currentUser?: StudentAuthUser | null;
+  currentUserId?: string;
 }
 
-export const CurrentClass: React.FC<CurrentClassProps> = ({ entry }) => {
+export const CurrentClass: React.FC<CurrentClassProps> = ({
+  entry,
+  occurrenceId,
+  expiresAt,
+  currentUser,
+  currentUserId,
+}) => {
   const progressPercent = entry.durationMinutes > 0
     ? Math.min(100, Math.max(0, ((entry.elapsedMinutes ?? 0) / entry.durationMinutes) * 100))
     : 0;
 
   const minutesLeft = Math.max(0, entry.durationMinutes - (entry.elapsedMinutes ?? 0));
   const minutesLeftDisplay = Math.ceil(minutesLeft);
+
+  const resolvedOccurrenceId =
+    occurrenceId || getOccurrenceId(new Date(), 'B', entry);
+  const resolvedExpiresAt =
+    expiresAt || getClassOccurrenceExpiration(new Date(), entry.endTime);
 
   return (
     <div className="card card-current">
@@ -85,6 +102,15 @@ export const CurrentClass: React.FC<CurrentClassProps> = ({ entry }) => {
           </span>
         )}
       </div>
+
+      {/* Temporary Class Updates & Comments */}
+      <ClassComments
+        occurrenceId={resolvedOccurrenceId}
+        expiresAt={resolvedExpiresAt}
+        isPast={false}
+        currentUser={currentUser}
+        currentUserId={currentUserId}
+      />
     </div>
   );
 };

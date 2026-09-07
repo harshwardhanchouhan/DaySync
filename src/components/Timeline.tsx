@@ -1,5 +1,6 @@
-import { useRef, useEffect, useCallback, type FC, type ReactNode } from 'react';
-import type { ScheduledEntry } from '../types';
+import React, { useRef, useEffect, useCallback, type FC, type ReactNode } from 'react';
+import type { ScheduledEntry, StudentAuthUser } from '../types';
+import { getOccurrenceId, getClassOccurrenceExpiration } from '../utils/classOccurrence';
 import { CurrentClass } from './CurrentClass';
 import { NextClass } from './NextClass';
 import { FreeGap } from './FreeGap';
@@ -78,6 +79,9 @@ interface TimelineProps {
   entries: ScheduledEntry[];
   isDayOver: boolean;
   hasNoClasses: boolean;
+  now?: Date;
+  currentUser?: StudentAuthUser | null;
+  currentUserId?: string;
   currentGroup?: string;
   onSwitchGroup?: () => void;
   onLogout?: () => void;
@@ -87,6 +91,9 @@ export const Timeline: React.FC<TimelineProps> = ({
   entries,
   isDayOver,
   hasNoClasses,
+  now = new Date(),
+  currentUser,
+  currentUserId,
   currentGroup,
   onSwitchGroup,
   onLogout,
@@ -248,31 +255,86 @@ export const Timeline: React.FC<TimelineProps> = ({
 
                     {/* Right: entry content */}
                     <div className="flex-1 pb-4 min-w-0">
-                      {entry.type === 'free' ? (
-                        <TimelineItem entry={entry} skipFocusEffect>
-                          <FreeGap entry={entry} />
-                        </TimelineItem>
-                      ) : entry.type === 'lunch' ? (
-                        <TimelineItem entry={entry}>
-                          <LunchBlock entry={entry} />
-                        </TimelineItem>
-                      ) : isCurrent ? (
-                        <TimelineItem entry={entry}>
-                          <CurrentClass entry={entry} />
-                        </TimelineItem>
-                      ) : isNext ? (
-                        <TimelineItem entry={entry}>
-                          <NextClass entry={entry} />
-                        </TimelineItem>
-                      ) : entry.status === 'past' ? (
-                        <TimelineItem entry={entry}>
-                          <FutureClass entry={entry} isPast />
-                        </TimelineItem>
-                      ) : (
-                        <TimelineItem entry={entry}>
-                          <FutureClass entry={entry} />
-                        </TimelineItem>
-                      )}
+                      {(() => {
+                        const isClass = entry.type === 'class';
+                        const occurrenceId = isClass
+                          ? getOccurrenceId(now, currentGroup || 'B', entry)
+                          : undefined;
+                        const expiresAt = isClass
+                          ? getClassOccurrenceExpiration(now, entry.endTime)
+                          : undefined;
+
+                        if (entry.type === 'free') {
+                          return (
+                            <TimelineItem entry={entry} skipFocusEffect>
+                              <FreeGap entry={entry} />
+                            </TimelineItem>
+                          );
+                        }
+
+                        if (entry.type === 'lunch') {
+                          return (
+                            <TimelineItem entry={entry}>
+                              <LunchBlock entry={entry} />
+                            </TimelineItem>
+                          );
+                        }
+
+                        if (isCurrent) {
+                          return (
+                            <TimelineItem entry={entry}>
+                              <CurrentClass
+                                entry={entry}
+                                occurrenceId={occurrenceId}
+                                expiresAt={expiresAt}
+                                currentUser={currentUser}
+                                currentUserId={currentUserId}
+                              />
+                            </TimelineItem>
+                          );
+                        }
+
+                        if (isNext) {
+                          return (
+                            <TimelineItem entry={entry}>
+                              <NextClass
+                                entry={entry}
+                                occurrenceId={occurrenceId}
+                                expiresAt={expiresAt}
+                                currentUser={currentUser}
+                                currentUserId={currentUserId}
+                              />
+                            </TimelineItem>
+                          );
+                        }
+
+                        if (entry.status === 'past') {
+                          return (
+                            <TimelineItem entry={entry}>
+                              <FutureClass
+                                entry={entry}
+                                isPast
+                                occurrenceId={occurrenceId}
+                                expiresAt={expiresAt}
+                                currentUser={currentUser}
+                                currentUserId={currentUserId}
+                              />
+                            </TimelineItem>
+                          );
+                        }
+
+                        return (
+                          <TimelineItem entry={entry}>
+                            <FutureClass
+                              entry={entry}
+                              occurrenceId={occurrenceId}
+                              expiresAt={expiresAt}
+                              currentUser={currentUser}
+                              currentUserId={currentUserId}
+                            />
+                          </TimelineItem>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
