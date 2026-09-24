@@ -365,10 +365,21 @@ export const Timeline: React.FC<TimelineProps> = ({
 
       {/* ─── End of Page Controls (Group Selector & Sign Out) ─────────────── */}
       {(onSwitchGroup || onLogout) && (
-        <div className="px-6 max-w-lg mx-auto mt-4 pt-4 border-t border-dashed border-stone-300/80">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/50 border border-stone-200/80 shadow-xs">
+        <div
+          className="px-6 max-w-lg mx-auto mt-4 pt-4 border-t border-dashed"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
+          <div
+            className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl shadow-xs transition-colors"
+            style={{
+              background: 'var(--color-cream-card)',
+              border: '1px solid var(--color-border)',
+            }}
+          >
             <div className="flex items-center gap-2.5">
-              <span className="font-pixel text-[0.65rem] text-stone-600">Active Batch:</span>
+              <span className="font-pixel text-[0.65rem]" style={{ color: 'var(--color-brown-600)' }}>
+                Active Batch:
+              </span>
               <span
                 className="font-pixel text-xs px-2.5 py-1 rounded-lg font-bold"
                 style={{
@@ -386,7 +397,12 @@ export const Timeline: React.FC<TimelineProps> = ({
                 <button
                   type="button"
                   onClick={onSwitchGroup}
-                  className="flex-1 sm:flex-none font-pixel text-[0.62rem] px-3.5 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-800 hover:bg-stone-50 active:scale-95 transition-all shadow-xs"
+                  className="flex-1 sm:flex-none font-pixel text-[0.62rem] px-3.5 py-2.5 rounded-xl active:scale-95 transition-all shadow-xs cursor-pointer"
+                  style={{
+                    background: 'var(--color-cream-card-focused)',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-brown-900)',
+                  }}
                 >
                   Change Group ▾
                 </button>
@@ -395,7 +411,10 @@ export const Timeline: React.FC<TimelineProps> = ({
                 <button
                   type="button"
                   onClick={onLogout}
-                  className="flex-1 sm:flex-none text-xs font-semibold px-3 py-2 rounded-xl text-stone-500 hover:text-red-700 hover:bg-red-50 active:scale-95 transition-all"
+                  className="flex-1 sm:flex-none text-xs font-semibold px-3 py-2 rounded-xl active:scale-95 transition-all cursor-pointer hover:bg-red-500/10 hover:text-red-500"
+                  style={{
+                    color: 'var(--color-brown-500)',
+                  }}
                 >
                   Sign out
                 </button>

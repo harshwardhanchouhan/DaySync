@@ -6,11 +6,31 @@
 
     <!-- PWA & Theme -->
     <meta name="theme-color" content="#2C211A" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="DaySync" />
+
+    <!-- Prevent Theme Flash (FOUC) -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('daysync_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#181A1B');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
 
     <!-- SEO -->
     <title>DaySync — Your entire day, in one glance.</title>

@@ -1,9 +1,12 @@
 import React from 'react';
 import { ScrollHighlight } from './originkit/ui/scroll-text-highlight';
+import { ThemeToggle } from './ThemeToggle';
 
 interface DayHeaderProps {
   now: Date;
   studentName?: string;
+  isDark?: boolean;
+  onToggleTheme?: () => void;
 }
 
 const GREETINGS = {
@@ -31,6 +34,8 @@ function getGreeting(hour: number): string {
 export const DayHeader: React.FC<DayHeaderProps> = ({
   now,
   studentName = 'Student',
+  isDark = false,
+  onToggleTheme,
 }) => {
   const hour     = now.getHours();
   const day      = DAYS[now.getDay()];
@@ -38,21 +43,35 @@ export const DayHeader: React.FC<DayHeaderProps> = ({
   const date     = now.getDate();
   const greeting = getGreeting(hour);
 
+  const primaryInitialColor = isDark ? '#E6E6E3' : '#111111';
+  const secondaryInitialColor = isDark ? '#B8BCBD' : '#353534';
+  const targetDimColor = isDark ? '#7F8486' : '#A4A49F';
+
   return (
     <header className="px-6 pt-12 pb-8 max-w-lg mx-auto header-entrance">
-      {/* Personalized Greeting */}
-      <ScrollHighlight
-        as="p"
-        className="font-pixel text-[0.68rem] tracking-wide mb-4 animate-fade-in-1"
-        style={{ fontWeight: 600 }}
-        text={`${greeting}, ${studentName} 👋`}
-        initialColor="#353534"
-        targetColor="#A4A49F"
-        splitBy="words"
-        scrollStart="top top+=45"
-        scrollEnd="+=120"
-        scrub={true}
-      />
+      {/* Top Bar: Personalized Greeting & Theme Toggle */}
+      <div className="flex items-center justify-between gap-3 mb-4 animate-fade-in-1">
+        <ScrollHighlight
+          as="p"
+          className="font-pixel text-[0.68rem] tracking-wide"
+          style={{ fontWeight: 600 }}
+          text={`${greeting}, ${studentName} 👋`}
+          initialColor={secondaryInitialColor}
+          targetColor={targetDimColor}
+          splitBy="words"
+          scrollStart="top top+=45"
+          scrollEnd="+=120"
+          scrub={true}
+        />
+
+        {onToggleTheme && (
+          <ThemeToggle
+            isDark={isDark}
+            onToggle={onToggleTheme}
+            className="flex-shrink-0"
+          />
+        )}
+      </div>
 
       {/* Large Day + Date */}
       <div className="mb-4">
@@ -64,8 +83,8 @@ export const DayHeader: React.FC<DayHeaderProps> = ({
             letterSpacing: '-0.02em',
           }}
           text={day}
-          initialColor="#111111"
-          targetColor="#A4A49F"
+          initialColor={primaryInitialColor}
+          targetColor={targetDimColor}
           splitBy="characters"
           scrollStart="top top+=75"
           scrollEnd="+=140"
@@ -79,8 +98,8 @@ export const DayHeader: React.FC<DayHeaderProps> = ({
             letterSpacing: '0.12em',
           }}
           text={`${month} ${date}`}
-          initialColor="#353534"
-          targetColor="#A4A49F"
+          initialColor={secondaryInitialColor}
+          targetColor={targetDimColor}
           splitBy="characters"
           scrollStart="top top+=115"
           scrollEnd="+=130"
@@ -94,8 +113,8 @@ export const DayHeader: React.FC<DayHeaderProps> = ({
         className="mt-5 text-sm animate-fade-in-4"
         style={{ fontWeight: 500 }}
         text="Here's your day."
-        initialColor="#353534"
-        targetColor="#A4A49F"
+        initialColor={secondaryInitialColor}
+        targetColor={targetDimColor}
         splitBy="words"
         scrollStart="top top+=155"
         scrollEnd="+=130"

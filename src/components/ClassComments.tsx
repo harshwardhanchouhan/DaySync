@@ -240,14 +240,17 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
   });
 
   return (
-    <div className="mt-4 pt-3 border-t border-stone-900/10">
+    <div
+      className="mt-4 pt-3 border-t"
+      style={{ borderColor: 'var(--color-border)' }}
+    >
       {/* ── Header ── */}
       <div className="flex items-center justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-1.5">
           <span className="text-xs" role="img" aria-label="Updates">💬</span>
           <span
             className="font-pixel text-[0.62rem] tracking-wider uppercase font-semibold"
-            style={{ color: 'var(--color-brown-800)' }}
+            style={{ color: 'var(--color-brown-700)' }}
           >
             Class Updates
           </span>
@@ -289,14 +292,26 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
 
       {/* ── Comments List ── */}
       {isLoading ? (
-        <div className="py-2.5 px-3 mb-2.5 rounded-xl bg-stone-900/[0.02] border border-dashed border-stone-300/60 text-center">
-          <span className="font-pixel text-[0.55rem] text-stone-400 tracking-wider">
+        <div
+          className="py-2.5 px-3 mb-2.5 rounded-xl border border-dashed text-center"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'rgba(0, 0, 0, 0.02)',
+          }}
+        >
+          <span className="font-pixel text-[0.55rem] tracking-wider" style={{ color: 'var(--color-brown-500)' }}>
             Loading updates...
           </span>
         </div>
       ) : activeComments.length === 0 ? (
-        <div className="py-2.5 px-3 mb-2.5 rounded-xl bg-stone-900/[0.02] border border-dashed border-stone-300/60 text-center">
-          <p className="font-pixel text-[0.55rem] text-stone-500 tracking-wide">
+        <div
+          className="py-2.5 px-3 mb-2.5 rounded-xl border border-dashed text-center"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'rgba(0, 0, 0, 0.02)',
+          }}
+        >
+          <p className="font-pixel text-[0.55rem] tracking-wide" style={{ color: 'var(--color-brown-500)' }}>
             No updates yet.
           </p>
         </div>
@@ -324,20 +339,20 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
                 className="p-2.5 rounded-xl transition-all"
                 style={{
                   background: hasDeletionGrace
-                    ? 'rgba(230, 220, 215, 0.45)'
-                    : 'rgba(255, 255, 255, 0.65)',
+                    ? 'rgba(230, 100, 80, 0.08)'
+                    : 'var(--color-cream-card-focused)',
                   border: hasDeletionGrace
-                    ? '1px dashed rgba(160, 140, 130, 0.6)'
-                    : '1px solid rgba(210, 207, 200, 0.7)',
+                    ? '1px dashed rgba(200, 80, 70, 0.4)'
+                    : '1px solid var(--color-border)',
                 }}
               >
                 {/* Author & Timestamp */}
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="font-semibold text-xs text-stone-800 truncate">
+                    <span className="font-semibold text-xs truncate" style={{ color: 'var(--color-brown-900)' }}>
                       {comment.author_name}
                     </span>
-                    <span className="text-[0.68rem] text-stone-600 flex-shrink-0">
+                    <span className="text-[0.68rem] flex-shrink-0" style={{ color: 'var(--color-brown-500)' }}>
                       • {formatRelativeTime(comment.created_at)}
                     </span>
                   </div>
@@ -346,7 +361,8 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
                     <button
                       type="button"
                       onClick={() => handleDelete(comment.id)}
-                      className="text-[0.65rem] text-stone-600 hover:text-red-700 px-1 py-0.5 rounded transition-colors"
+                      className="text-[0.65rem] hover:text-red-500 px-1 py-0.5 rounded transition-colors cursor-pointer"
+                      style={{ color: 'var(--color-brown-500)' }}
                       title="Delete your comment"
                       aria-label="Delete your comment"
                     >
@@ -357,17 +373,26 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
 
                 {/* Comment Text */}
                 <p
-                  className="text-xs leading-relaxed text-stone-900 break-words mb-2"
-                  style={{ whiteSpace: 'pre-wrap' }}
+                  className="text-xs leading-relaxed break-words mb-2"
+                  style={{
+                    color: 'var(--color-brown-900)',
+                    whiteSpace: 'pre-wrap',
+                  }}
                 >
                   {comment.content}
                 </p>
 
                 {/* 5-minute grace period alert banner */}
                 {hasDeletionGrace && (
-                  <div className="mb-2 px-2 py-1 rounded-lg bg-stone-200/70 text-[0.62rem] text-stone-700 flex items-center justify-between">
+                  <div
+                    className="mb-2 px-2 py-1 rounded-lg text-[0.62rem] flex items-center justify-between"
+                    style={{
+                      background: 'var(--color-brown-100)',
+                      color: 'var(--color-brown-700)',
+                    }}
+                  >
                     <span className="font-medium">Flagged by votes:</span>
-                    <span className="font-pixel text-[0.52rem] font-bold text-stone-800">
+                    <span className="font-pixel text-[0.52rem] font-bold" style={{ color: 'var(--color-brown-900)' }}>
                       deleting in {graceCountdownStr}
                     </span>
                   </div>
@@ -384,16 +409,13 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
                     style={{
                       background:
                         comment.user_vote === 'up'
-                          ? 'var(--color-brown-900)'
-                          : 'rgba(0, 0, 0, 0.04)',
+                          ? 'var(--color-active)'
+                          : 'var(--color-active-bg)',
                       color:
                         comment.user_vote === 'up'
-                          ? '#FFFFFF'
+                          ? 'var(--color-cream)'
                           : 'var(--color-brown-700)',
-                      border:
-                        comment.user_vote === 'up'
-                          ? '1px solid var(--color-brown-950)'
-                          : '1px solid rgba(0, 0, 0, 0.08)',
+                      border: '1px solid var(--color-border)',
                     }}
                   >
                     <span>▲</span>
@@ -409,16 +431,13 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
                     style={{
                       background:
                         comment.user_vote === 'down'
-                          ? 'var(--color-brown-900)'
-                          : 'rgba(0, 0, 0, 0.04)',
+                          ? 'var(--color-active)'
+                          : 'var(--color-active-bg)',
                       color:
                         comment.user_vote === 'down'
-                          ? '#FFFFFF'
+                          ? 'var(--color-cream)'
                           : 'var(--color-brown-700)',
-                      border:
-                        comment.user_vote === 'down'
-                          ? '1px solid var(--color-brown-950)'
-                          : '1px solid rgba(0, 0, 0, 0.08)',
+                      border: '1px solid var(--color-border)',
                     }}
                   >
                     <span>▼</span>
@@ -445,13 +464,23 @@ export const ClassComments: React.FC<ClassCommentsProps> = ({
             placeholder="Write an update..."
             maxLength={280}
             disabled={isSubmitting}
-            className="flex-1 text-xs px-3 py-2 rounded-xl bg-white/80 border border-stone-300 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-1 focus:ring-stone-600 transition-all"
+            className="flex-1 text-xs px-3 py-2 rounded-xl focus:outline-none transition-all placeholder:opacity-50"
+            style={{
+              background: 'var(--color-cream-card-focused)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-brown-950)',
+            }}
             aria-label="Write a class update"
           />
           <button
             type="submit"
             disabled={isSubmitting || !newCommentText.trim()}
-            className="font-pixel text-[0.58rem] px-3.5 py-2 rounded-xl border border-stone-900 bg-stone-900 text-white font-semibold hover:bg-stone-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center min-w-[3.8rem] cursor-pointer"
+            className="font-pixel text-[0.58rem] px-3.5 py-2 rounded-xl font-semibold active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center min-w-[3.8rem] cursor-pointer"
+            style={{
+              background: 'var(--color-active)',
+              color: 'var(--color-cream)',
+              border: '1px solid var(--color-border)',
+            }}
           >
             {isSubmitting ? '...' : 'Post'}
           </button>

@@ -14,6 +14,7 @@ import {
   type NotificationStatus,
 } from './services/notifications';
 import {
+  AUTH_STORAGE_KEY,
   clearStaleAuthSession,
   getStoredStudentProfile,
   processSupabaseUser,
@@ -21,8 +22,12 @@ import {
   signOut,
 } from './services/auth';
 import { isSupabaseConfigured, supabase } from './services/supabase';
+import { AuthLoadingScreen } from './components/AuthLoadingScreen';
+import { useTheme } from './hooks/useTheme';
 
 function App() {
+  const { isDark, toggleTheme } = useTheme();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [user, setUser] = useState<StudentAuthUser | null>(() => getStoredStudentProfile());
 
   const [pendingStudent, setPendingStudent] = useState<{
@@ -39,86 +44,184 @@ function App() {
 
   // ── Supabase Auth Lifecycle Listener ───────────────────────────────────────
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    let isMounted = true;
 
-    // Check if returning from Google OAuth redirect in URL
-    const isOAuthRedirect =
-      window.location.hash.includes('access_token=') ||
-      window.location.search.includes('code=') ||
-      sessionStorage.getItem('daysync_oauth_in_progress') === 'true';
+    // 1. Cross-tab synchronization via browser storage event
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === AUTH_STORAGE_KEY) {
+        if (!e.newValue) {
+          // User logged out in another tab
+          setUser(null);
+          setPendingStudent(null);
+          setShowGroupModal(false);
+          setCurrentUserId(undefined);
+        } else {
+          // User logged in or updated group in another tab
+          try {
+            const updated = JSON.parse(e.newValue) as StudentAuthUser;
+            if (updated && updated.email) {
+              setUser(updated);
+              if (updated.id) setCurrentUserId(updated.id);
+              setPendingStudent(null);
+              setShowGroupModal(false);
+            }
+          } catch {
+            // Ignore parse errors
+          }
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
-    supabase.auth
-      .getSession()
-      .then(async ({ data, error }) => {
+    // 2. Initial Session Check on App Startup / Page Load
+    async function initAuth() {
+      // Check if returning from Google OAuth redirect in URL
+      const hasOAuthHash =
+        window.location.hash.includes('access_token=') ||
+        window.location.search.includes('code=');
+      const hasOAuthFlag = sessionStorage.getItem('daysync_oauth_in_progress') === 'true';
+      const isOAuthRedirect = hasOAuthHash || hasOAuthFlag;
+
+      // Clean up the URL hash/query immediately so future refreshes do not re-trigger isOAuthRedirect
+      if (hasOAuthHash) {
+        window.history.replaceState(null, document.title, window.location.pathname);
+      }
+      if (hasOAuthFlag) {
+        sessionStorage.removeItem('daysync_oauth_in_progress');
+      }
+
+      if (!isSupabaseConfigured) {
+        // Dev / Simulated OAuth fallback
+        const stored = getStoredStudentProfile();
+        if (stored && isMounted) {
+          setUser(stored);
+          setCurrentUserId(stored.id);
+        }
+        if (isMounted) setIsAuthLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.auth.getSession();
+
         if (error) {
-          console.warn('[DaySync Auth] Supabase session error:', error.message);
-          // If project was paused/resumed or refresh token is dead, clear stale session so it stops looping
+          console.warn('[DaySync Auth] Supabase session retrieval notice:', error.message);
+          // Only clear session if token is genuinely invalid/revoked
           if (
-            error.message?.includes('Refresh Token') ||
-            error.message?.includes('invalid_grant') ||
-            error.message?.includes('Failed to fetch') ||
-            error.status === 400 ||
-            error.status === 401
+            error.message?.includes('Refresh Token Not Found') ||
+            error.message?.includes('invalid_grant')
           ) {
             await clearStaleAuthSession();
-            setUser(null);
-            setPendingStudent(null);
+            if (isMounted) {
+              setUser(null);
+              setPendingStudent(null);
+              setShowGroupModal(false);
+            }
+          } else {
+            // Network hiccup or offline: retain cached user session
+            const stored = getStoredStudentProfile();
+            if (stored && isMounted) {
+              setUser(stored);
+              setCurrentUserId(stored.id);
+            }
           }
+          if (isMounted) setIsAuthLoading(false);
           return;
         }
 
         const session = data?.session;
         if (session?.user) {
-          sessionStorage.removeItem('daysync_oauth_in_progress');
-          setCurrentUserId(session.user.id);
+          const effectiveId = session.user.id;
+          if (isMounted) setCurrentUserId(effectiveId);
+
           const { student, error: procErr } = await processSupabaseUser(session.user);
           if (procErr) {
-            setLoginError(procErr);
-            setUser(null);
-            setPendingStudent(null);
+            if (isMounted) {
+              setLoginError(procErr);
+              setUser(null);
+              setPendingStudent(null);
+              setShowGroupModal(false);
+              setIsAuthLoading(false);
+            }
             return;
           }
 
-          if (student) {
-            if (isOAuthRedirect) {
+          if (student && isMounted) {
+            // Check if student already has a configured group (from local cache or Supabase profiles)
+            const stored = getStoredStudentProfile();
+            const existingGroup = stored?.group || student.group;
+
+            if (existingGroup) {
+              // User is already fully onboarded! Keep them logged in smoothly across refreshes
+              const completeUser: StudentAuthUser = {
+                id: effectiveId,
+                email: student.email,
+                name: student.name,
+                group: existingGroup,
+                program: student.program || 'CS AI',
+                year: student.year || '1st',
+              };
+              setUser(completeUser);
+              saveStudentProfile(completeUser, effectiveId);
+              setPendingStudent(null);
+              setShowGroupModal(false);
+            } else if (isOAuthRedirect || !stored) {
+              // Brand new login without a group selected yet: prompt group selection
               setPendingStudent({
                 name: student.name,
                 email: student.email,
-                group: student.group || 'B',
+                group: 'B',
                 program: student.program || 'CS AI',
                 year: student.year || '1st',
               });
               setShowGroupModal(true);
-            } else {
-              setUser((prev) => prev || {
-                id: session.user.id,
-                email: student.email,
-                name: student.name,
-                group: student.group || 'B',
-                program: student.program || 'CS AI',
-                year: student.year || '1st',
-              });
             }
           }
-        } else if (isOAuthRedirect) {
-          sessionStorage.removeItem('daysync_oauth_in_progress');
+        } else {
+          // No active session in Supabase: check if offline dev profile exists
+          const stored = getStoredStudentProfile();
+          if (stored && !isSupabaseConfigured && isMounted) {
+            setUser(stored);
+          } else if (isMounted) {
+            setUser(null);
+            setPendingStudent(null);
+            setShowGroupModal(false);
+          }
         }
-      })
-      .catch(async (err) => {
-        console.warn('[DaySync Auth] Error checking session:', err);
-        await clearStaleAuthSession();
-        setUser(null);
-      });
+      } catch (err) {
+        console.warn('[DaySync Auth] Error during auth init:', err);
+        const stored = getStoredStudentProfile();
+        if (stored && isMounted) {
+          setUser(stored);
+        }
+      } finally {
+        if (isMounted) {
+          setIsAuthLoading(false);
+        }
+      }
+    }
 
-    // Subscribe to auth changes (Google OAuth callback and tab focus token refresh)
+    initAuth();
+
+    // 3. Supabase Auth State Change Listener (Cross-tab and token refresh events)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (
-        (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') &&
-        session?.user
-      ) {
-        setCurrentUserId(session.user.id);
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+        if (!session?.user) return;
+
+        const effectiveId = session.user.id;
+        setCurrentUserId(effectiveId);
+
+        // If the user already has a complete profile with group, keep it without prompting
+        const stored = getStoredStudentProfile();
+        if (stored && stored.email.toLowerCase() === session.user.email?.toLowerCase() && stored.group) {
+          setUser((curr) => curr || stored);
+          return;
+        }
+
         const { student, error: procErr } = await processSupabaseUser(session.user);
         if (procErr) {
           setLoginError(procErr);
@@ -129,35 +232,44 @@ function App() {
 
         if (student) {
           setLoginError('');
-          setUser((currentUser) => {
-            if (currentUser && currentUser.group) {
-              return currentUser;
-            }
-            const stored = getStoredStudentProfile();
-            if (stored && stored.group) {
-              return stored;
-            }
-            if (event === 'SIGNED_IN') {
-              setPendingStudent({
-                name: student.name,
-                email: student.email,
-                group: student.group || 'B',
-                program: student.program || 'CS AI',
-                year: student.year || '1st',
-              });
-              setShowGroupModal(true);
-            }
-            return currentUser;
-          });
+          const existingGroup = student.group || stored?.group;
+
+          if (existingGroup) {
+            const completeUser: StudentAuthUser = {
+              id: effectiveId,
+              email: student.email,
+              name: student.name,
+              group: existingGroup,
+              program: student.program || 'CS AI',
+              year: student.year || '1st',
+            };
+            setUser(completeUser);
+            saveStudentProfile(completeUser, effectiveId);
+            setPendingStudent(null);
+            setShowGroupModal(false);
+          } else if (event === 'SIGNED_IN') {
+            // Only prompt group modal on initial sign in if no group was ever chosen
+            setPendingStudent({
+              name: student.name,
+              email: student.email,
+              group: 'B',
+              program: student.program || 'CS AI',
+              year: student.year || '1st',
+            });
+            setShowGroupModal(true);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setPendingStudent(null);
+        setShowGroupModal(false);
         setCurrentUserId(undefined);
       }
     });
 
     return () => {
+      isMounted = false;
+      window.removeEventListener('storage', handleStorageChange);
       subscription.unsubscribe();
     };
   }, []);
@@ -224,6 +336,7 @@ function App() {
     setUser(null);
     setPendingStudent(null);
     setShowGroupModal(false);
+    setCurrentUserId(undefined);
   };
 
   // ── Request permission handler ────────────────────────────────────────────
@@ -235,6 +348,11 @@ function App() {
   // Show the bar if there's a next class (of type 'class', not lunch/free)
   const nextClassEntry =
     dayState.nextEntry?.type === 'class' ? dayState.nextEntry : null;
+
+  // Render authentic loading screen during initial session verification
+  if (isAuthLoading) {
+    return <AuthLoadingScreen />;
+  }
 
   return (
     <div
@@ -284,7 +402,12 @@ function App() {
         aria-label="DaySync — Your daily timetable"
       >
         {/* Day header */}
-        <DayHeader now={now} studentName={user?.name || 'Student'} />
+        <DayHeader
+          now={now}
+          studentName={user?.name || 'Student'}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+        />
 
         {/* Timeline walkthrough with bottom controls */}
         <Timeline

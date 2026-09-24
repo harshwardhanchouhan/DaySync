@@ -320,7 +320,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {isNewUser ? 'Select Your Group' : 'Change Batch Group'}
             </h2>
             <p className="text-xs mb-6 stagger-3" style={{ color: 'var(--color-brown-500)' }}>
-              Hi <span className="font-semibold text-stone-900">{effectiveName || 'Student'}</span>! Which batch group's dayline do you want to view?
+              Hi <span className="font-semibold" style={{ color: 'var(--color-brown-950)' }}>{effectiveName || 'Student'}</span>! Which batch group's dayline do you want to view?
             </p>
 
             <form onSubmit={handleFinalSubmit} className="space-y-5">
@@ -352,8 +352,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                         </span>
                         {isSelected && (
                           <span
-                            className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] text-white font-bold animate-fade-in-1 shadow-xs"
-                            style={{ background: 'var(--color-active)' }}
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold animate-fade-in-1 shadow-xs"
+                            style={{
+                              background: 'var(--color-active)',
+                              color: 'var(--color-cream)',
+                            }}
                           >
                             ✓
                           </span>
@@ -375,9 +378,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="submit"
                 disabled={isExiting}
-                className="btn-shimmer w-full mt-6 py-3.5 px-4 rounded-xl font-pixel text-xs text-white transition-all duration-300 transform active:scale-[0.98] hover:scale-[1.01] shadow-md hover:shadow-lg hover:brightness-105 cursor-pointer stagger-5 disabled:opacity-80"
+                className="btn-shimmer w-full mt-6 py-3.5 px-4 rounded-xl font-pixel text-xs transition-all duration-300 transform active:scale-[0.98] hover:scale-[1.01] shadow-md hover:shadow-lg hover:brightness-105 cursor-pointer stagger-5 disabled:opacity-80"
                 style={{
                   background: 'var(--color-active)',
+                  color: 'var(--color-cream)',
                 }}
               >
                 {isNewUser ? 'View My Dayline 🚀' : 'Save & View Timetable 🚀'}

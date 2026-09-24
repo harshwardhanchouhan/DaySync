@@ -192,8 +192,14 @@ export async function processSupabaseUser(user: User): Promise<{
 
   let preferredGroup: Group | undefined = undefined;
 
+  // Check locally saved profile first (instant and offline friendly)
+  const stored = getStoredStudentProfile();
+  if (stored && stored.email.toLowerCase() === email && stored.group) {
+    preferredGroup = stored.group;
+  }
+
   // Attempt to check if student had a preferred group previously for default selection hint
-  if (isSupabaseConfigured) {
+  if (!preferredGroup && isSupabaseConfigured) {
     try {
       const { data } = await supabase
         .from('profiles')
@@ -217,7 +223,7 @@ export async function processSupabaseUser(user: User): Promise<{
       group: preferredGroup,
       program: 'CS AI',
       year: '1st',
-      hasCompletedOnboarding: false,
+      hasCompletedOnboarding: Boolean(preferredGroup),
     },
     error: null,
   };
