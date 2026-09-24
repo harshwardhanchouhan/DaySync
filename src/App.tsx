@@ -14,6 +14,8 @@ import {
   type NotificationStatus,
 } from './services/notifications';
 import {
+  clearStaleAuthSession,
+  getStoredStudentProfile,
   processSupabaseUser,
   saveStudentProfile,
   signOut,
@@ -21,7 +23,7 @@ import {
 import { isSupabaseConfigured, supabase } from './services/supabase';
 
 function App() {
-  const [user, setUser] = useState<StudentAuthUser | null>(null);
+  const [user, setUser] = useState<StudentAuthUser | null>(() => getStoredStudentProfile());
 
   const [pendingStudent, setPendingStudent] = useState<{
     name: string;
@@ -33,7 +35,7 @@ function App() {
 
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [loginError, setLoginError] = useState('');
-  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(() => getStoredStudentProfile()?.id);
 
   // ── Supabase Auth Lifecycle Listener ───────────────────────────────────────
   useEffect(() => {
@@ -45,41 +47,81 @@ function App() {
       window.location.search.includes('code=') ||
       sessionStorage.getItem('daysync_oauth_in_progress') === 'true';
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user && isOAuthRedirect) {
-        sessionStorage.removeItem('daysync_oauth_in_progress');
-        setCurrentUserId(session.user.id);
-        const { student, error } = await processSupabaseUser(session.user);
+    supabase.auth
+      .getSession()
+      .then(async ({ data, error }) => {
         if (error) {
-          setLoginError(error);
-          setUser(null);
-          setPendingStudent(null);
+          console.warn('[DaySync Auth] Supabase session error:', error.message);
+          // If project was paused/resumed or refresh token is dead, clear stale session so it stops looping
+          if (
+            error.message?.includes('Refresh Token') ||
+            error.message?.includes('invalid_grant') ||
+            error.message?.includes('Failed to fetch') ||
+            error.status === 400 ||
+            error.status === 401
+          ) {
+            await clearStaleAuthSession();
+            setUser(null);
+            setPendingStudent(null);
+          }
           return;
         }
 
-        if (student) {
-          // Immediately show Group Selection screen after Google authentication
-          setPendingStudent({
-            name: student.name,
-            email: student.email,
-            group: student.group || 'B',
-            program: student.program || 'CS AI',
-            year: student.year || '1st',
-          });
-          setShowGroupModal(true);
+        const session = data?.session;
+        if (session?.user) {
+          sessionStorage.removeItem('daysync_oauth_in_progress');
+          setCurrentUserId(session.user.id);
+          const { student, error: procErr } = await processSupabaseUser(session.user);
+          if (procErr) {
+            setLoginError(procErr);
+            setUser(null);
+            setPendingStudent(null);
+            return;
+          }
+
+          if (student) {
+            if (isOAuthRedirect) {
+              setPendingStudent({
+                name: student.name,
+                email: student.email,
+                group: student.group || 'B',
+                program: student.program || 'CS AI',
+                year: student.year || '1st',
+              });
+              setShowGroupModal(true);
+            } else {
+              setUser((prev) => prev || {
+                id: session.user.id,
+                email: student.email,
+                name: student.name,
+                group: student.group || 'B',
+                program: student.program || 'CS AI',
+                year: student.year || '1st',
+              });
+            }
+          }
+        } else if (isOAuthRedirect) {
+          sessionStorage.removeItem('daysync_oauth_in_progress');
         }
-      }
-    });
+      })
+      .catch(async (err) => {
+        console.warn('[DaySync Auth] Error checking session:', err);
+        await clearStaleAuthSession();
+        setUser(null);
+      });
 
     // Subscribe to auth changes (Google OAuth callback and tab focus token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (
+        (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') &&
+        session?.user
+      ) {
         setCurrentUserId(session.user.id);
-        const { student, error } = await processSupabaseUser(session.user);
-        if (error) {
-          setLoginError(error);
+        const { student, error: procErr } = await processSupabaseUser(session.user);
+        if (procErr) {
+          setLoginError(procErr);
           setUser(null);
           setPendingStudent(null);
           return;
@@ -87,9 +129,15 @@ function App() {
 
         if (student) {
           setLoginError('');
-          // Only prompt group selection if user is not already logged in in this session
           setUser((currentUser) => {
-            if (!currentUser) {
+            if (currentUser && currentUser.group) {
+              return currentUser;
+            }
+            const stored = getStoredStudentProfile();
+            if (stored && stored.group) {
+              return stored;
+            }
+            if (event === 'SIGNED_IN') {
               setPendingStudent({
                 name: student.name,
                 email: student.email,

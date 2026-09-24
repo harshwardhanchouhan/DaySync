@@ -112,15 +112,58 @@ export async function signInWithGoogleOAuth(): Promise<{
 }
 
 /**
- * Signs out the current user and clears local session
+ * Safely loads the active student profile from local storage if available
+ */
+export function getStoredStudentProfile(): StudentAuthUser | null {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StudentAuthUser;
+  } catch (err) {
+    console.error('[DaySync Auth] Error reading local user session:', err);
+    return null;
+  }
+}
+
+/**
+ * Completely purges stale or corrupted auth session tokens from localStorage
+ * and resets Supabase client session. This prevents endless 502 Bad Gateway
+ * / CORS / invalid refresh token loops after project pause/unpause.
+ */
+export async function clearStaleAuthSession(): Promise<void> {
+  try {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    sessionStorage.removeItem('daysync_oauth_in_progress');
+
+    // Remove any Supabase auth storage tokens from localStorage
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('sb-') || key.includes('-auth-token'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+    if (isSupabaseConfigured) {
+      // Local scope signOut won't trigger external network call if backend was cold
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    }
+  } catch (err) {
+    console.warn('[DaySync Auth] Error clearing stale session:', err);
+  }
+}
+
+/**
+ * Signs out the current user and clears local and remote session
  */
 export async function signOut(): Promise<void> {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+  await clearStaleAuthSession();
   if (isSupabaseConfigured) {
     try {
       await supabase.auth.signOut();
     } catch (err) {
-      console.error('[DaySync Auth] Error signing out from Supabase:', err);
+      console.warn('[DaySync Auth] Note on Supabase sign out:', err);
     }
   }
 }

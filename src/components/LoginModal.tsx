@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Group, StudentAuthUser } from '../types';
-import { signInWithGoogleOAuth } from '../services/auth';
+import { clearStaleAuthSession, signInWithGoogleOAuth } from '../services/auth';
 
 interface LoginModalProps {
   onLogin: (user: StudentAuthUser) => void;
@@ -77,6 +77,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setIsLoading(true);
 
     try {
+      // Clear any dead or corrupted session tokens before initiating fresh OAuth
+      await clearStaleAuthSession();
       const result = await signInWithGoogleOAuth();
       if (result.error) {
         setError(result.error.message || 'Please sign in using your SST Scaler Google account.');
